@@ -6,11 +6,9 @@ from users.models import User
 
 
 class IngredientFilter(django_filters.FilterSet):
-    """Фильтр для ингредиентов"""
-    name = django_filters.CharFilter(
-        field_name='name',
-        lookup_expr='icontains',
-    )
+    """Фильтр для ингредиентов."""
+    name = django_filters.CharFilter(field_name='name',
+                                     lookup_expr='icontains')
 
     class Meta:
         model = Ingredient
@@ -18,7 +16,7 @@ class IngredientFilter(django_filters.FilterSet):
 
 
 class RecipeFilter(django_filters.FilterSet):
-    """Фильтр для рецептов"""
+    """Фильтр для рецептов."""
     tags = django_filters.ModelMultipleChoiceFilter(
         queryset=Tag.objects.all(),
         field_name='tags__slug',

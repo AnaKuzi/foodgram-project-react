@@ -3,7 +3,7 @@ from django.db import models
 
 
 class User(AbstractUser):
-    """Модель пользователя"""
+    """Модель пользователя."""
     email = models.EmailField(
         'E-mail',
         unique=True,
@@ -40,7 +40,7 @@ class User(AbstractUser):
 
 
 class Follow(models.Model):
-    """Модель подписок"""
+    """Модель подписок."""
     user = models.ForeignKey(User,
                              on_delete=models.CASCADE,
                              related_name='follower',

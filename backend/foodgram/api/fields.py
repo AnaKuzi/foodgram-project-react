@@ -6,7 +6,7 @@ from rest_framework import serializers
 
 
 class RecipeImageField(serializers.ImageField):
-    """Переопределение кодировки изображений"""
+    """Переопределение кодировки изображений."""
     def to_internal_value(self, data):
         format, imgstr = data.split(';base64,')
         ext = format.split('/')[-1]

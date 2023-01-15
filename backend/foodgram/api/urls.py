@@ -1,7 +1,7 @@
 from django.urls import include, path
 from rest_framework import routers
 
-from .views import (APIToken, DeleteToken, FavoriteView,
+from .views import (APIToken, BlacklistRefreshView, FavoriteView,
                     IngredientViewSet, FollowView, RecipeViewSet,
                     TagViewSet, UserViewSet, ShoppingCartView)
 app_name = 'api'
@@ -21,5 +21,6 @@ urlpatterns = [
            ShoppingCartView.as_view(), name='cart'),
       path('', include(router.urls)),
       path('auth/token/login/', APIToken.as_view(), name='token'),
-      path('auth/token/logout/', DeleteToken.as_view(), name='del_token'),
+      path('auth/token/logout/',
+           BlacklistRefreshView.as_view(), name='logout'),
 ]

@@ -1,6 +1,7 @@
 import collections.abc
 
 from rest_framework import exceptions, serializers
+from rest_framework.exceptions import ValidationError
 
 from recipes.models import (
     FavoriteRecipe,
@@ -96,16 +97,14 @@ class PasswordChangeSerializer(serializers.Serializer):
 
 
 class JWTTokenSerializer(serializers.Serializer):
-    """Сериалайзер для получения токена"""
-    password = serializers.CharField(max_length=150)
+    """Сериалайзер для получения токена."""
     email = serializers.EmailField()
+    password = serializers.CharField(max_length=150)
 
     def validate(self, data):
-        if not User.objects.filter(email=data['email']).exists():
+        if not User.objects.filter(email=data['email'],
+                                   password=data['password']).exists():
             raise exceptions.NotFound('Пользователь не существует')
-        if not User.objects.filter(password=data['password'],
-                                   email=data['email']).exists():
-            raise exceptions.ParseError('Неверный пароль')
         return data
 
 

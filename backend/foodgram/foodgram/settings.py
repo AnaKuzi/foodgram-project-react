@@ -9,7 +9,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'secret_key')
 
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -115,6 +115,9 @@ REST_FRAMEWORK = {
 
 SIMPLE_JWT = {
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.SlidingToken',),
-    'SLIDING_TOKEN_LIFETIME': timedelta(days=5),
+
     'AUTH_HEADER_TYPES': ('Token',),
+
+    'SLIDING_TOKEN_LIFETIME': timedelta(days=90),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }

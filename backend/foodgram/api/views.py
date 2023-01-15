@@ -9,6 +9,7 @@ from rest_framework.permissions import (AllowAny, IsAuthenticated,
 from rest_framework_simplejwt.tokens import SlidingToken
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from recipes.models import FavoriteRecipe, Ingredient, Recipe, Tag
 from shopping_cart.models import ShoppingCart
@@ -32,41 +33,31 @@ from .serializers import (
 )
 
 
-class GetPostViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
-                     mixins.RetrieveModelMixin, viewsets.GenericViewSet):
-    """Вьюсет для просмотра публикации """
-
-
-class UserViewSet(GetPostViewSet):
-    """Вьюсет для работы с пользователями"""
+class UserViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
+                  mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    """Вьюсет для работы с пользователями."""
 
     queryset = User.objects.all()
     pagination_class = RecipePagination
     permission_classes = (AllowAny,)
 
     def get_serializer_class(self):
+        """
+        В зависимости от метода
+        возвращает нужный сериалайзер.
+        """
         if self.action == 'create':
             return UserSerializer
         return FollowSerializer
 
-    @action(detail=False, methods=('get',),
+    @action(detail=False, methods=['get'],
             url_name='me', permission_classes=(IsAuthenticated,))
     def me(self, request, *args, **kwargs):
-        serializer = FollowSerializer(request.user,
+        serializer = FollowSerializer(self.request.user,
                                       context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=('get',),
-            url_name='subscriptions', permission_classes=(IsAuthenticated,))
-    def subscriptions(self, request, *args, **kwargs):
-        queryset = User.objects.filter(following__user=request.user.id)
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = ShowFollowingsSerializer(
-                page, many=True, context={'request': request},)
-            return self.get_paginated_response(serializer.data)
-
-    @action(detail=False, methods=('post',),
+    @action(detail=False, methods=['post'],
             url_name='set_password', permission_classes=(IsAuthenticated,))
     def set_password(self, request, *args, **kwargs):
         serializer = PasswordChangeSerializer(data=request.data,
@@ -76,65 +67,62 @@ class UserViewSet(GetPostViewSet):
         request.user.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @action(detail=False, methods=['get'],
+            url_name='subscriptions', permission_classes=(IsAuthenticated,))
+    def subscriptions(self, request, *args, **kwargs):
+        queryset = User.objects.filter(following__user=request.user.id)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = ShowFollowingsSerializer(
+                page, many=True, context={'request': request},)
+            return self.get_paginated_response(serializer.data)
+
 
 class APIToken(APIView):
-    """Вьюкласс для получения токена"""
+    """Вьюкласс для получения токена (регистрации)."""
     permission_classes = (AllowAny,)
 
     def post(self, request):
         serializer = JWTTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        # serializer.save()
         user = get_object_or_404(
-            User, password=serializer.data['password'],
-            email=serializer.data['email'])
-        token = SlidingToken.for_user(user)
+            User,
+            email=serializer.data['email'],
+            password=serializer.data['password'])
         return Response(
-                {'auth_token': str(token)}, status=status.HTTP_200_OK)
+                {'auth_token': str(SlidingToken.for_user(user))},
+                status=status.HTTP_200_OK)
 
 
-class DeleteToken(APIView):
-    """Вьюкласс для удаления токена"""
+class BlacklistRefreshView(APIView):
+    """Вьюкласс для удаления токена."""
 
     def post(self, request):
-        token = request.auth
+        token = RefreshToken(request.data.get('refresh'))
         token.blacklist()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class FollowView(APIView):
-    """Вьюкласс для управления подписками"""
-
+    """Вьюкласс для управления подписками."""
     def post(self, request, user_id):
         author = get_object_or_404(User, id=user_id)
-        if Follow.objects.filter(
-             user=request.user, author=author).exists():
-            return Response(
-                {'error': 'Вы уже подписаны на этого пользователя'},
-                status=status.HTTP_400_BAD_REQUEST)
-        if author == request.user:
-            return Response(
-                {'error': 'Нельзя подписаться на самого себя'},
-                status=status.HTTP_400_BAD_REQUEST)
-        Follow.objects.create(user=request.user, author=author)
+        Follow.objects.create(user=self.request.user, author=author)
         serializer = ShowFollowingsSerializer(author,
                                               context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete(self, request, user_id):
         author = get_object_or_404(User, id=user_id)
-        delete_following = Follow.objects.filter(user=request.user,
+        delete_following = Follow.objects.filter(user=self.request.user,
                                                  author=author)
-        if not delete_following.exists():
-            return Response(
-                {'error': 'Вы не подписаны на этого автора'},
-                status=status.HTTP_400_BAD_REQUEST
-                )
         delete_following.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
-    """Вьюсет для работы с тэгами"""
+    """Вьюсет для работы с тэгами."""
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     permission_classes = (AllowAny,)
@@ -142,7 +130,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
-    """Вьюсет для работы с ингредиентами"""
+    """Вьюсет для работы с ингредиентами."""
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = (AllowAny,)
@@ -215,49 +203,56 @@ class RecipeViewSet(viewsets.ModelViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             headers = self.get_success_headers(serializer.data)
-            return Response(
-                serializer.data,
-                status=status.HTTP_201_CREATED,
-                headers=headers,
-            )
+            return Response(serializer.data,
+                            status=status.HTTP_201_CREATED,
+                            headers=headers)
         if request.method == 'DELETE':
-            instance = get_object_or_404(
-                ShoppingCart,
-                user=self.request.user,
-                recipe=kwargs.get('pk'),
-            )
+            instance = get_object_or_404(ShoppingCart,
+                                         user=self.request.user,
+                                         recipe=kwargs.get('pk'))
             self.perform_destroy(instance)
             return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class FavoriteView(APIView):
-    """Вьюкласс для избранного"""
-    MODEL = FavoriteRecipe
+    """Вьюкласс для избранного."""
 
     def post(self, request, recipe_id):
         recipe = get_object_or_404(Recipe, id=recipe_id)
-        if self.MODEL.objects.filter(
-             user=request.user, recipe=recipe).exists():
-            return Response(
-                {'error': 'Вы уже добавили этот рецепт'},
-                status=status.HTTP_400_BAD_REQUEST
-                )
-        favorite = self.MODEL.objects.create(user=request.user, recipe=recipe)
+        if FavoriteRecipe.objects.filter(user=self.request.user,
+                                         recipe=recipe).exists():
+            return Response({'error': 'Этот рецепт уже в избранном'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        favorite = FavoriteRecipe.objects.create(user=request.user,
+                                                 recipe=recipe)
         serializer = FavoriteSerializer(favorite)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete(self, request, recipe_id):
         recipe = get_object_or_404(Recipe, id=recipe_id)
-        deleted = self.MODEL.objects.filter(
-            user=request.user, recipe=recipe)
-        if not deleted.exists():
-            return Response(
-                {'error': 'У вас нет этого рецепта'},
-                status=status.HTTP_400_BAD_REQUEST)
+        deleted = FavoriteRecipe.objects.filter(
+            user=self.request.user, recipe=recipe)
         deleted.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class ShoppingCartView(FavoriteView):
-    """Вьюкласс для списка покупок"""
-    MODEL = ShoppingCart
+    """Вьюкласс для списка покупок."""
+
+    def post(self, request, recipe_id):
+        recipe = get_object_or_404(Recipe, id=recipe_id)
+        if ShoppingCart.objects.filter(user=self.request.user,
+                                       recipe=recipe).exists():
+            return Response({'error': 'Уже добавлено'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        shopping_cart = ShoppingCart.objects.create(user=request.user,
+                                                    recipe=recipe)
+        serializer = FavoriteSerializer(shopping_cart)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def delete(self, request, recipe_id):
+        recipe = get_object_or_404(Recipe, id=recipe_id)
+        del_cart = ShoppingCart.objects.filter(
+            user=self.request.user, recipe=recipe)
+        del_cart.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
