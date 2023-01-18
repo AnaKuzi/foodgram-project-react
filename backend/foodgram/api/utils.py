@@ -1,6 +1,5 @@
 from django.shortcuts import get_object_or_404
-
-from recipes.models import Ingredient, RecipeIngredient, Tag, RecipeTag
+from recipes.models import Ingredient, RecipeIngredient, RecipeTag, Tag
 
 
 def add_recipe_tags_ingredients(tags, ingredients, recipe):

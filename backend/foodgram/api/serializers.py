@@ -1,20 +1,12 @@
 import collections.abc
 
+from recipes.models import (FavoriteRecipe, Ingredient, Recipe,
+                            RecipeIngredient, RecipeTag, Tag)
 from rest_framework import exceptions, serializers
-from rest_framework.exceptions import ValidationError
-
-from recipes.models import (
-    FavoriteRecipe,
-    Ingredient,
-    Recipe,
-    RecipeIngredient,
-    RecipeTag,
-    Tag,
-)
 from shopping_cart.models import ShoppingCart
 from users.models import Follow, User
 
-from .fields import RecipeImageField
+from .fields import Base64ImageField
 from .utils import add_recipe_tags_ingredients
 
 
@@ -53,9 +45,10 @@ class FollowSerializer(UserSerializer):
         read_only_fields = ('id', )
 
     def get_is_subscribed(self, obj):
-        if not self.context['request'].user.is_authenticated:
+        user = self.context['request'].user
+        if not user.is_authenticated:
             return False
-        return Follow.objects.filter(user=self.context['request'].user,
+        return Follow.objects.filter(user=user,
                                      author=obj).exists()
 
 
@@ -69,7 +62,7 @@ class ShowFollowingsSerializer(FollowSerializer):
         fields = ('email', 'id', 'username',
                   'first_name', 'last_name', 'is_subscribed',
                   'recipes', 'recipes_count')
-        read_only_fields = ('__all__',)
+        read_only_fields = fields
 
     def get_recipes(self, obj):
         request = self.context['request']
@@ -148,7 +141,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
     author = FollowSerializer()
     ingredients = IngredientRecipeSerializer(
         many=True, source='recipeingredient')
-    image = RecipeImageField()
+    image = Base64ImageField()
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
 
@@ -157,7 +150,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'tags', 'author', 'ingredients', 'is_favorited',
             'is_in_shopping_cart', 'name', 'image', 'text', 'cooking_time')
-        read_only_fields = ('__all__',)
+        read_only_fields = fields
 
     def get_is_favorited(self, obj):
         if self.context['request'].user.is_anonymous:
@@ -177,7 +170,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     author = serializers.IntegerField(required=False, write_only=True)
     tags = serializers.ListField(write_only=True)
     ingredients = serializers.ListField(write_only=True)
-    image = RecipeImageField()
+    image = Base64ImageField()
 
     class Meta:
         model = Recipe
@@ -240,6 +233,16 @@ class FavoriteSerializer(serializers.ModelSerializer):
     image = serializers.ImageField(source='recipe.image')
     cooking_time = serializers.ReadOnlyField(source='recipe.cooking_time')
 
+    def validate(self, data):
+        request = self.context['request']
+        if not request or request.user.is_anonymous:
+            return False
+        recipe = data['recipe']
+        if FavoriteRecipe.objects.filter(user=request.user,
+                                         recipe=recipe).exists():
+            raise serializers.ValidationError('Этот рецепт уже в избранном')
+        return data
+
 
 class RecipeSubcribeSerializer(serializers.ModelSerializer):
     """Сериалайзер для  вывода рецептов в подписках"""
@@ -247,4 +250,4 @@ class RecipeSubcribeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
-        read_only_fields = ('__all__',)
+        read_only_fields = fields

@@ -4,6 +4,8 @@ from django.db import models
 
 class User(AbstractUser):
     """Модель пользователя."""
+    USERNAME_FIELD = 'email'
+    
     email = models.EmailField(
         'E-mail',
         unique=True,
@@ -17,8 +19,6 @@ class User(AbstractUser):
     last_name = models.CharField('Фамилия пользователя',
                                  max_length=150,
                                  blank=False)
-
-    USERNAME_FIELD = 'email'
 
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
 
