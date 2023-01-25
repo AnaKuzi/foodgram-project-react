@@ -9,10 +9,10 @@ from rest_framework.decorators import action
 from rest_framework.permissions import (AllowAny, IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken, SlidingToken
 from shopping_cart.models import ShoppingCart
 from shopping_cart.serializers import ShoppingCartSerializer
+from users.models import Follow
 
 from .filters import IngredientFilter, RecipeFilter
 from .pagination import RecipePagination
@@ -24,7 +24,6 @@ from .serializers import (FavoriteSerializer, FollowSerializer,
                           TagSerializer, UserSerializer)
 
 User = get_user_model()
-Follow = get_user_model()
 
 
 class UserViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
@@ -88,7 +87,7 @@ class APIToken(generics.CreateAPIView):
                 status=status.HTTP_200_OK)
 
 
-class BlacklistRefreshView(generics.CreateAPIView):
+class BlacklistRefresh(generics.CreateAPIView):
     """Вьюкласс для удаления токена."""
 
     def post(self, request):
@@ -97,8 +96,11 @@ class BlacklistRefreshView(generics.CreateAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class FollowView(APIView):
+class FollowView(generics.CreateAPIView,
+                 generics.DestroyAPIView):
     """Вьюкласс для управления подписками."""
+    serializer_class = FollowSerializer
+
     def post(self, request, user_id):
         author = get_object_or_404(User, id=user_id)
         Follow.objects.create(user=self.request.user, author=author)
@@ -145,7 +147,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         В зависимости от метода
         возвращает нужный сериалайзер
         """
-        if self.action == 'create' or self.action == 'partial_update':
+        if self.action in ('create', 'partial_update'):
             return RecipeSerializer
         return RecipeReadSerializer
 
@@ -176,7 +178,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 amount=Sum('recipeingredient__amount')
             )
             shopping_cart = 'Список покупок:'
-            for _, ingredient in enumerate(total):
+            for ingredient in total:
                 shopping_cart += (
                     f"\n- {ingredient[name]}: "
                     f"{ingredient[amount]} "
@@ -213,9 +215,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class BaseViewSet(generics.CreateAPIView,
-                  generics.DestroyAPIView):
-    """Базовый вьюсет."""
+class BaseView(generics.CreateAPIView,
+               generics.DestroyAPIView):
+    """Базовый вью."""
 
     def create(self, request, *args, **kwargs):
         recipe_id = self.kwargs['recipe_id']
@@ -232,14 +234,14 @@ class BaseViewSet(generics.CreateAPIView,
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class FavoriteViewSet(BaseViewSet):
+class FavoriteView(BaseView):
     """Вьюкласс для избранного."""
     queryset = FavoriteRecipe.objects.all()
     serializer_class = FavoriteSerializer
     model = FavoriteRecipe
 
 
-class ShoppingCartViewSet(BaseViewSet):
+class ShoppingCartView(BaseView):
     """Вьюкласс для списка покупок."""
     queryset = ShoppingCart.objects.all()
     serializer_class = ShoppingCartSerializer

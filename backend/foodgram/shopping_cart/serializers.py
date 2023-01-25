@@ -4,6 +4,11 @@ from shopping_cart.models import ShoppingCart
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
+    """Сериалайзер для списка покупок."""
+    class Meta:
+        model = ShoppingCart
+        fields = '__all__'
+
     def validate(self, data):
         user = data.get('user')
         recipe = data.get('recipe')
@@ -21,7 +26,3 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
             'image': str(instance.recipe.image),
             'cooking_time': instance.recipe.cooking_time,
         }
-
-    class Meta:
-        model = ShoppingCart
-        fields = '__all__'

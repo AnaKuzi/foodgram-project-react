@@ -1,5 +1,5 @@
-from django.db import models
 from django.contrib.auth import get_user_model
+from django.db import models
 
 User = get_user_model()
 
@@ -7,15 +7,15 @@ User = get_user_model()
 class Tag(models.Model):
     """Модель тега."""
     name = models.CharField(max_length=200,
+                            blank=False,
                             unique=True,
                             help_text='Используйте краткое, ключевое слово')
     slug = models.SlugField(max_length=200,
-                            blank=True,
+                            blank=False,
                             unique=True,
-                            null=False,
                             help_text='Создайте уникальную ссылку')
     color = models.CharField(max_length=7,
-                             blank=True,
+                             blank=False,
                              unique=True,
                              help_text='Формат - HEX')
 

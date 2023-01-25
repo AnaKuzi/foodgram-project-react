@@ -1,17 +1,20 @@
 import collections.abc
 
+from django.contrib.auth import get_user_model
+from drf_extra_fields.fields import Base64ImageField
+from rest_framework import exceptions, serializers
+
 from recipes.models import (FavoriteRecipe, Ingredient, Recipe,
                             RecipeIngredient, RecipeTag, Tag)
-from rest_framework import exceptions, serializers
 from shopping_cart.models import ShoppingCart
-from users.models import Follow, User
-
-from .fields import Base64ImageField
+from users.models import Follow
 from .utils import add_recipe_tags_ingredients
+
+User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """Сериалайзер для пользователей"""
+    """Сериалайзер для пользователей."""
     password = serializers.CharField(required=True, write_only=True,
                                      max_length=150)
 
@@ -79,7 +82,7 @@ class ShowFollowingsSerializer(FollowSerializer):
 
 
 class PasswordChangeSerializer(serializers.Serializer):
-    """Сериалайзер изменения пароля"""
+    """Сериалайзер изменения пароля."""
     current_password = serializers.CharField(max_length=150)
     new_password = serializers.CharField(max_length=150)
 
@@ -166,7 +169,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
 
 
 class RecipeSerializer(serializers.ModelSerializer):
-    """Сериалайзер для записи рецептов"""
+    """Сериалайзер для записи рецептов."""
     author = serializers.IntegerField(required=False, write_only=True)
     tags = serializers.ListField(write_only=True)
     ingredients = serializers.ListField(write_only=True)
@@ -245,7 +248,7 @@ class FavoriteSerializer(serializers.ModelSerializer):
 
 
 class RecipeSubcribeSerializer(serializers.ModelSerializer):
-    """Сериалайзер для  вывода рецептов в подписках"""
+    """Сериалайзер для  вывода рецептов в подписках."""
 
     class Meta:
         model = Recipe

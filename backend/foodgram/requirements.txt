@@ -1,8 +1,10 @@
 asgiref==3.6.0
+debugpy
 Django==2.2.19
 django-filter==21.1
 djangorestframework==3.12.4
 djangorestframework-simplejwt==5.2.0
+drf_extra_fields
 flake8==5.0.4
 gunicorn==20.0.4
 importlib-metadata==4.2.0

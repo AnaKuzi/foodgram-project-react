@@ -5,7 +5,8 @@ from django.db import models
 class User(AbstractUser):
     """Модель пользователя."""
     USERNAME_FIELD = 'email'
-    
+    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']    
+
     email = models.EmailField(
         'E-mail',
         unique=True,
@@ -20,8 +21,6 @@ class User(AbstractUser):
                                  max_length=150,
                                  blank=False)
 
-    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
-
     class Meta:
         ordering = ('-id',)
         constraints = [
@@ -34,9 +33,7 @@ class User(AbstractUser):
         verbose_name_plural = 'Пользователи'
 
     def __str__(self):
-        return (
-            f'pk: {self.id} email={self.email}'
-        )
+        return f'pk: {self.id} email={self.email}'
 
 
 class Follow(models.Model):
@@ -62,4 +59,4 @@ class Follow(models.Model):
         verbose_name_plural = 'Подписки'
 
     def __str__(self):
-        return f'pk: {self.id} {self.user} подписан на {self.author}'
+        return f'{self.user_id} подписан на {self.author_id}'

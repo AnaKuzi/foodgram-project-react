@@ -11,8 +11,6 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'secret_key')
 
 DEBUG = True
 
-DATE_DISPLAY = '%Y-%m-%d_%H:%M:%S'
-
 ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
