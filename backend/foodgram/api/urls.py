@@ -14,14 +14,14 @@ router.register('ingredients', IngredientViewSet, basename='ingredients')
 router.register('recipes', RecipeViewSet, basename='recipes')
 
 urlpatterns = [
-     path('auth/token/login/', APIToken.as_view(), name='token'),
-     path('auth/token/logout/',
-          BlacklistRefresh.as_view(), name='logout'),
-     path('users/<int:user_id>/subscribe/',
-          FollowView.as_view(), name='follow'),
-     path('recipes/<int:recipe_id>/favorite/',
-          FavoriteView.as_view(), name='favorite'),
-     path('recipes/<int:recipe_id>/shopping_cart/',
-          ShoppingCartView.as_view(), name='cart'),
-     path('', include(router.urls)),
+    path('auth/token/login/', APIToken.as_view(), name='token'),
+    path('auth/token/logout/',
+         BlacklistRefresh.as_view(), name='logout'),
+    path('users/<int:user_id>/subscribe/',
+         FollowView.as_view(), name='follow'),
+    path('recipes/<int:recipe_id>/favorite/',
+         FavoriteView.as_view(), name='favorite'),
+    path('recipes/<int:recipe_id>/shopping_cart/',
+         ShoppingCartView.as_view(), name='cart'),
+    path('', include(router.urls)),
 ]

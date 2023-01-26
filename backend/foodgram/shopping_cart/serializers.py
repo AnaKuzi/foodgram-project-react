@@ -1,5 +1,4 @@
 from rest_framework import exceptions, serializers
-
 from shopping_cart.models import ShoppingCart
 
 

@@ -2,12 +2,12 @@ import collections.abc
 
 from django.contrib.auth import get_user_model
 from drf_extra_fields.fields import Base64ImageField
-from rest_framework import exceptions, serializers
-
 from recipes.models import (FavoriteRecipe, Ingredient, Recipe,
                             RecipeIngredient, RecipeTag, Tag)
+from rest_framework import exceptions, serializers
 from shopping_cart.models import ShoppingCart
 from users.models import Follow
+
 from .utils import add_recipe_tags_ingredients
 
 User = get_user_model()

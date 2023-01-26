@@ -16,7 +16,6 @@ services:
     build: ../backend/foodgram/
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - ../backend/foodgram:/app
       - static_value:/app/static/
       - media_value:/app/media/
     env_file:

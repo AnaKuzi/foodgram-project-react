@@ -1,7 +1,10 @@
 from django.contrib.auth import get_user_model
+from django.core.validators import MinValueValidator
 from django.db import models
 
 User = get_user_model()
+
+MIN_VALUE = 1
 
 
 class Tag(models.Model):
@@ -107,7 +110,12 @@ class RecipeIngredient(models.Model):
     ingredient = models.ForeignKey(Ingredient,
                                    on_delete=models.CASCADE,
                                    related_name='recipes')
-    amount = models.PositiveIntegerField('Amount', blank=False)
+    amount = models.PositiveIntegerField(
+        'Amount',
+        blank=False,
+        validators=(MinValueValidator(
+            MIN_VALUE,
+            f'Количество ингредиентов должно быть не менее {MIN_VALUE}'),))
 
     class Meta:
         verbose_name = 'Связь рецепт-ингредиент'

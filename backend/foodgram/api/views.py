@@ -83,8 +83,8 @@ class APIToken(generics.CreateAPIView):
             email=serializer.data['email'],
             password=serializer.data['password'])
         return Response(
-                {'auth_token': str(SlidingToken.for_user(user))},
-                status=status.HTTP_200_OK)
+            {'auth_token': str(SlidingToken.for_user(user))},
+            status=status.HTTP_200_OK)
 
 
 class BlacklistRefresh(generics.CreateAPIView):
