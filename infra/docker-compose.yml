@@ -5,7 +5,7 @@ services:
       - ./db_data:/var/lib/postgresql/data/
     env_file:
       - ./.env
-  backend:
+  :
     image: anakuzi/foodgram:latest
     restart: always
     command: python manage.py runserver
