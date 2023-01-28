@@ -16,7 +16,9 @@ services:
     depends_on:
       - db
   frontend:
-    image: anakuzi/infra_frontend:latest
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
     volumes:
       - ../frontend/:/app/result_build/
     depends_on:
