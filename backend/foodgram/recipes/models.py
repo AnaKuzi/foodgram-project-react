@@ -113,9 +113,9 @@ class RecipeIngredient(models.Model):
     amount = models.PositiveIntegerField(
         'Amount',
         blank=False,
-        validators=(MinValueValidator(
+        validators=[MinValueValidator(
             MIN_VALUE,
-            f'Количество ингредиентов должно быть не менее {MIN_VALUE}'),))
+            message=f'Кол-во ингредиентов должно быть не менее {MIN_VALUE}')])
 
     class Meta:
         verbose_name = 'Связь рецепт-ингредиент'
