@@ -6,7 +6,7 @@ services:
     env_file:
       - ./.env
   backend:
-    image: anakuzi/foodgram_backend:latest
+    image: anakuzi/infra_backend:latest
     restart: always
     volumes:
       - static_value:/app/static/
@@ -16,7 +16,7 @@ services:
     depends_on:
       - db
   frontend:
-    image: anakuzi/foodgram_frontend:latest
+    image: anakuzi/infra_frontend:latest
     volumes:
       - ../frontend/:/app/result_build/
     depends_on:
