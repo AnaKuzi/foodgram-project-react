@@ -127,6 +127,7 @@ class IngredientRecipeSerializer(serializers.HyperlinkedModelSerializer):
     measurement_unit = serializers.ReadOnlyField(
         source='ingredient.measurement_unit_id'
     )
+    amount = serializers.IntegerField(min_value=1)
 
     class Meta:
         model = RecipeIngredient
