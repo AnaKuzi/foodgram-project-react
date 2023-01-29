@@ -180,9 +180,12 @@ class RecipeSerializer(serializers.ModelSerializer):
     def validate_ingredients(self, data):
         ingredients = []
         for ingredient in data:
+            if ingredient.get('amount').isnumeric():
+                raise exceptions.ValidationError(
+                    'Количество ингредиента должно быть целым числом')
             if int(ingredient.get('amount')) < 1:
                 raise exceptions.ParseError(
-                    'Количество должно быть быть больше нуля')
+                    'Количество ингредиента должно быть быть больше нуля')
             if ingredient.get('id') in ingredients:
                 raise exceptions.ParseError(
                     'Нельзя дублировать один ингридиент')
