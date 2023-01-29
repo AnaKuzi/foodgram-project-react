@@ -127,7 +127,6 @@ class IngredientRecipeSerializer(serializers.HyperlinkedModelSerializer):
     measurement_unit = serializers.ReadOnlyField(
         source='ingredient.measurement_unit_id'
     )
-    amount = serializers.IntegerField(min_value=1)
 
     class Meta:
         model = RecipeIngredient
@@ -205,6 +204,19 @@ class RecipeSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 detail='Список ингредиентов не валидный'
             )
+        ingredients_list = []
+        for ingredient in ingredients:
+            ingredient_id = ingredient['ingredient']['id']
+            if ingredient_id in ingredients_list:
+                raise serializers.ValidationError({
+                    'ingredients': 'Ингредиенты должны быть уникальными!'
+                })
+            ingredients_list.append(ingredient_id)
+            amount = ingredient['amount']
+            if int(amount) <= 0:
+                raise serializers.ValidationError({
+                    'amount': 'Количество ингредиента должно быть больше нуля!'
+                })
         return data
 
     def create(self, validated_data):
