@@ -127,7 +127,6 @@ class IngredientRecipeSerializer(serializers.HyperlinkedModelSerializer):
     measurement_unit = serializers.ReadOnlyField(
         source='ingredient.measurement_unit_id'
     )
-    amount = serializers.ReadOnlyField(source='ingredient.amount')
 
     class Meta:
         model = RecipeIngredient
@@ -180,40 +179,19 @@ class RecipeSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = '__all__'
 
-    def validate(self, data):
-        tags = self.initial_data.get('tags')
-        if tags is None:
-            raise serializers.ValidationError(
-                detail='Необходимо укзать тэги'
-            )
-        elif (
-            isinstance(tags, collections.abc.Sequence) is False
-            or len(tags) == 0
-        ):
-            raise serializers.ValidationError(
-                detail='Cписок тегов не валидный'
-            )
-        ingredients = self.initial_data.get('ingredients')
-        if ingredients is None:
-            raise serializers.ValidationError(
-                detail='Необходимо заполнить список ингредиентов'
-            )
-        elif (
-            isinstance(ingredients, collections.abc.Sequence) is False
-            or len(ingredients) == 0
-        ):
-            raise serializers.ValidationError(
-                detail='Список ингредиентов не валидный'
-            )
-        ingredients_list = []
-        for ingredient in ingredients:
-            ingredient_id = ingredient['ingredient']['id']
-            if ingredient_id in ingredients_list:
-                raise serializers.ValidationError({
-                    'ingredients': 'Ингредиенты должны быть уникальными!'
-                })
+    def validate_ingredients(self, data):
+        MIN_AMOUNT = 1
+        ingredients = []
+        for ingredient in data:
+            if int(ingredient.get('amount')) < MIN_AMOUNT:
+                raise exceptions.ParseError(
+                    'Количество должно быть быть больше нуля')
+            if ingredient.get('id') in ingredients:
+                raise exceptions.ParseError(
+                    'Нельзя дублировать один ингридиент')
+            ingredients.append(ingredient.get('id'))
         return data
-
+    
     def create(self, validated_data):
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
