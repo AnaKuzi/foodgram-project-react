@@ -137,14 +137,6 @@ class IngredientRecipeSerializer(serializers.HyperlinkedModelSerializer):
             'amount',
         )
 
-    def validate(self, data):
-        amount = data['amount']
-        if int(amount) <= 0:
-            raise serializers.ValidationError({
-                'amount': 'Количество должно быть больше 0'
-            })
-        return data
-
 
 class RecipeReadSerializer(serializers.ModelSerializer):
     """Сериалайзер для просмотра рецептов"""
@@ -219,11 +211,6 @@ class RecipeSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({
                     'ingredients': 'Ингредиенты должны быть уникальными!'
                 })
-        cooking_time = data['cooking_time']
-        if int(cooking_time) <= 0:
-            raise serializers.ValidationError({
-                'cooking_time': 'Время приготовления должно быть больше 0!'
-            })
         return data
 
     def create(self, validated_data):
