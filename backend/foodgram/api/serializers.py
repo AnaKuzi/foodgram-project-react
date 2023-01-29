@@ -181,15 +181,15 @@ class RecipeSerializer(serializers.ModelSerializer):
         ingredients = []
         for ingredient in data:
             if ingredient.get('amount').isnumeric():
-                raise exceptions.ValidationError(
+                if int(ingredient.get('amount')) < 1:
+                    raise exceptions.ParseError(
+                        'Количество ингредиента должно быть больше нуля')
+                if ingredient.get('id') in ingredients:
+                    raise exceptions.ParseError(
+                        'Нельзя дублировать один ингридиент')
+                ingredients.append(ingredient.get('id'))
+                raise exceptions.ParseError(
                     'Количество ингредиента должно быть целым числом')
-            if int(ingredient.get('amount')) < 1:
-                raise exceptions.ParseError(
-                    'Количество ингредиента должно быть быть больше нуля')
-            if ingredient.get('id') in ingredients:
-                raise exceptions.ParseError(
-                    'Нельзя дублировать один ингридиент')
-            ingredients.append(ingredient.get('id'))
         return data
 
     def create(self, validated_data):
@@ -235,6 +235,10 @@ class FavoriteSerializer(serializers.ModelSerializer):
 
 class RecipeSubcribeSerializer(serializers.ModelSerializer):
     """Сериалайзер для  вывода рецептов в подписках."""
+    id = serializers.ReadOnlyField(source='recipe.id')
+    name = serializers.ReadOnlyField(source='recipe.name')
+    image = serializers.ImageField(source='recipe.image')
+    cooking_time = serializers.ReadOnlyField(source='recipe.cooking_time')
 
     class Meta:
         model = Recipe
