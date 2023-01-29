@@ -180,7 +180,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     def validate_ingredients(self, data):
         ingredients = []
         for ingredient in data:
-            if ingredient.get('amount').isnumeric() == True:
+            if ingredient.get('amount').isnumeric() is True:
                 if int(ingredient.get('amount')) < 1:
                     raise exceptions.ParseError(
                         'Количество ингредиента должно быть больше нуля')
