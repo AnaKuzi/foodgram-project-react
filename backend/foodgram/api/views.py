@@ -147,7 +147,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         В зависимости от метода
         возвращает нужный сериалайзер
         """
-        if self.action in ['create', 'partial_update']:
+        if self.action == 'create' or self.action == 'partial_update':
             return RecipeSerializer
         return RecipeReadSerializer
 
