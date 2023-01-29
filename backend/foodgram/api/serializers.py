@@ -127,7 +127,6 @@ class IngredientRecipeSerializer(serializers.HyperlinkedModelSerializer):
     measurement_unit = serializers.ReadOnlyField(
         source='ingredient.measurement_unit_id'
     )
-    amount = serializers.IntegerField(min_value=1)
 
     class Meta:
         model = RecipeIngredient
@@ -137,6 +136,14 @@ class IngredientRecipeSerializer(serializers.HyperlinkedModelSerializer):
             'measurement_unit',
             'amount',
         )
+
+    def validate(self, data):
+        amount = data['amount']
+        if int(amount) <= 0:
+            raise serializers.ValidationError({
+                'amount': 'Количество должно быть больше 0'
+            })
+        return data
 
 
 class RecipeReadSerializer(serializers.ModelSerializer):
