@@ -25,7 +25,7 @@ const Subscription = ({ email, first_name, last_name, username, removeSubscripti
           return <li className={styles.subscriptionItem} key={recipe.id}>
             <LinkComponent className={styles.subscriptionRecipeLink} href={`/recipes/${recipe.id}`} title={
               <div className={styles.subscriptionRecipe}>
-                <img src={`media/${recipe.image}`} alt={recipe.name} className={styles.subscriptionRecipeImage} />
+                <img src={recipe.image} alt={recipe.name} className={styles.subscriptionRecipeImage} />
                 <h3 className={styles.subscriptionRecipeTitle}>
                   {recipe.name}
                 </h3>
