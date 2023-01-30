@@ -192,18 +192,6 @@ class RecipeSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 detail='Cписок тегов не валидный'
             )
-        ingredients = self.initial_data.get('ingredients')
-        if ingredients is None:
-            raise serializers.ValidationError(
-                detail='Необходимо заполнить список ингредиентов'
-            )
-        elif (
-            isinstance(ingredients, collections.abc.Sequence) is False
-            or len(ingredients) == 0
-        ):
-            raise serializers.ValidationError(
-                detail='Список ингредиентов не валидный'
-            )
         return data
 
     def create(self, validated_data):
