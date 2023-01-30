@@ -1,11 +1,13 @@
+import collections.abc
+
 from django.contrib.auth import get_user_model
 from drf_extra_fields.fields import Base64ImageField
+from rest_framework import exceptions, serializers
+
 from recipes.models import (FavoriteRecipe, Ingredient, Recipe,
                             RecipeIngredient, RecipeTag, Tag)
-from rest_framework import exceptions, serializers
 from shopping_cart.models import ShoppingCart
 from users.models import Follow
-
 from .utils import add_recipe_tags_ingredients
 
 User = get_user_model()
@@ -176,6 +178,33 @@ class RecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = '__all__'
+
+    def validate(self, data):
+        tags = self.initial_data.get('tags')
+        if tags is None:
+            raise serializers.ValidationError(
+                detail='Необходимо укзать тэги'
+            )
+        elif (
+            isinstance(tags, collections.abc.Sequence) is False
+            or len(tags) == 0
+        ):
+            raise serializers.ValidationError(
+                detail='Cписок тегов не валидный'
+            )
+        ingredients = self.initial_data.get('ingredients')
+        if ingredients is None:
+            raise serializers.ValidationError(
+                detail='Необходимо заполнить список ингредиентов'
+            )
+        elif (
+            isinstance(ingredients, collections.abc.Sequence) is False
+            or len(ingredients) == 0
+        ):
+            raise serializers.ValidationError(
+                detail='Список ингредиентов не валидный'
+            )
+        return data
 
     def create(self, validated_data):
         tags = validated_data.pop('tags')

@@ -12,5 +12,4 @@ def add_recipe_tags_ingredients(tags, ingredients, recipe):
             amount=ingredient['amount']) for ingredient in ingredients])
     RecipeTag.objects.bulk_create(
         [RecipeTag(tag=get_object_or_404(Tag, id=tag),
-                   recipe=recipe) for tag in tags]
-    )
+                   recipe=recipe) for tag in tags])
