@@ -206,13 +206,16 @@ class RecipeSerializer(serializers.ModelSerializer):
             )
         for ingredient in ingredients:
             added_ingredients = []
-            if int(ingredient.get('amount')) < 1:
+            if str(ingredient['amount']).isnumeric() is False:
+                raise exceptions.ParseError(
+                    'Количество ингредиента должно быть целым числом')
+            if int(ingredient['amount']) < 1:
                 raise exceptions.ParseError(
                     'Количество ингредиента должно быть больше нуля')
-            if ingredient.get('id') in added_ingredients:
+            if ingredient['id'] in added_ingredients:
                 raise exceptions.ParseError(
                     'Нельзя дублировать один ингридиент')
-            ingredients.append(ingredient.get('id'))
+            added_ingredients.append(ingredient.get('id'))
         return data
 
     def create(self, validated_data):
