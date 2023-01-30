@@ -197,11 +197,10 @@ class RecipeSerializer(serializers.ModelSerializer):
     def validate_ingredients(self, data):
         ingredients = []
         for ingredient in data:
-            str_amount = ingredient.get('amount')
-            if str_amount.isdigit() is False:
-                raise exceptions.ValidationError(
-                    'Количество ингредиента должно быть целым числом')
-            if int(str_amount) < 1:
+            # if ingredient.get('amount').isdigit() is False:
+            #     raise exceptions.ValidationError(
+            #         'Количество ингредиента должно быть целым числом')
+            if int(ingredient.get('amount')) < 1:
                 raise exceptions.ParseError(
                     'Количество должно быть быть больше нуля')
             if ingredient.get('id') in ingredients:
