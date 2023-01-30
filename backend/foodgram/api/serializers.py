@@ -179,7 +179,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = '__all__'
 
-    def validate(self, data):
+    def validate_tags(self, data):
         tags = self.initial_data.get('tags')
         if tags is None:
             raise serializers.ValidationError(
