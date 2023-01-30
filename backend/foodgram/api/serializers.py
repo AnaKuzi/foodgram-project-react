@@ -194,22 +194,6 @@ class RecipeSerializer(serializers.ModelSerializer):
             )
         return data
 
-    # def validate_ingredients(self, data):
-    #     ingredients = self.initial_data.get('ingredients')
-    #     added_ingredients = []
-    #     for ingredient in ingredients:
-    #         if ingredient.get('amount').isnumeric() is False:
-    #             raise exceptions.ParseError(
-    #                 'Количество ингредиента должно быть целым числом')
-    #         else:
-    #         if int(ingredient.get('amount')) < 1:
-    #             raise exceptions.ParseError(
-    #                 'Количество ингредиента должно быть больше нуля')
-    #         if ingredient.get('id') in added_ingredients:
-    #             raise exceptions.ParseError(
-    #                 'Нельзя дублировать один ингридиент')
-    #         ingredients.append(ingredient.get('id'))
-    #     return data
     def validate_ingredients(self, data):
         ingredients = []
         for ingredient in data:
@@ -221,7 +205,7 @@ class RecipeSerializer(serializers.ModelSerializer):
                     'Нельзя дублировать один ингридиент')
             ingredients.append(ingredient.get('id'))
         return data
-    
+
     def create(self, validated_data):
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
