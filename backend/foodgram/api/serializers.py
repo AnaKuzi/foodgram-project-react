@@ -200,10 +200,10 @@ class RecipeSerializer(serializers.ModelSerializer):
             if ingredient.get('amount').isnumeric() is False:
                 raise exceptions.ParseError(
                     'Количество ингредиента должно быть целым числом')
-            if int(ingredient.get('amount')) < 1:
+            elif int(ingredient.get('amount')) < 1:
                 raise exceptions.ParseError(
                     'Количество ингредиента должно быть больше нуля')
-            if ingredient.get('id') in ingredients:
+            elif ingredient.get('id') in ingredients:
                 raise exceptions.ParseError(
                     'Нельзя дублировать один ингридиент')
             ingredients.append(ingredient.get('id'))
