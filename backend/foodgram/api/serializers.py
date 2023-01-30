@@ -204,6 +204,15 @@ class RecipeSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 detail='Список ингредиентов не валидный'
             )
+        for ingredient in ingredients:
+            added_ingredients = []
+            if int(ingredient.get('amount')) < 1:
+                raise exceptions.ParseError(
+                    'Количество ингредиента должно быть больше нуля')
+            if ingredient.get('id') in added_ingredients:
+                raise exceptions.ParseError(
+                    'Нельзя дублировать один ингридиент')
+            ingredients.append(ingredient.get('id'))
         return data
 
     def create(self, validated_data):
