@@ -179,19 +179,16 @@ class RecipeSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = '__all__'
 
-    def validate_tags(self, data):
-        tags = self.initial_data.get('tags')
-        if tags is None:
-            raise serializers.ValidationError(
-                detail='Необходимо укзать тэги'
-            )
-        elif (
-            isinstance(tags, collections.abc.Sequence) is False
-            or len(tags) == 0
-        ):
-            raise serializers.ValidationError(
-                detail='Cписок тегов не валидный'
-            )
+    def validate_ingredients(self, data):
+        ingredients = []
+        for ingredient in data:
+            if int(ingredient.get('amount')) < 1:
+                raise exceptions.ParseError(
+                    'Количество должно быть быть больше нуля')
+            if ingredient.get('id') in ingredients:
+                raise exceptions.ParseError(
+                    'Нельзя дублировать один ингридиент')
+            ingredients.append(ingredient.get('id'))
         return data
 
     def create(self, validated_data):
